@@ -446,7 +446,8 @@
     <div class="snow-layer" id="snowLayer"></div>
 
     <!-- Fireworks Canvas -->
-    <canvas id="fireworks-canvas"></canvas>
+    <canvas id="fireworks-canvas"
+        style="position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:5;"></canvas>
 
     <!-- Special Message Overlay -->
     <div id="special-message">
@@ -487,8 +488,8 @@
     </div>
 
     <!-- State indicator -->
-    <div id="state-indicator">
-        <span id="current-state">🎄 TREE</span>
+    <div id="state-indicator" title="Click to manually change state (Debug)">
+        <span id="current-state" onclick="toggleDebugState()" style="cursor: pointer;">🎄 TREE</span>
     </div>
 
     <!-- Music Controls -->
@@ -533,6 +534,34 @@
             }
         }
         createSnow();
+
+        // --- Background Music ---
+        const bgMusic = new Audio('./audio.mp3');
+        bgMusic.loop = true;
+        bgMusic.volume = 0.5;
+        let isMusicPlaying = false;
+
+        const musicBtn = document.getElementById('btnMusic');
+        musicBtn.addEventListener('click', () => {
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                musicBtn.textContent = '🎵';
+                musicBtn.classList.remove('playing');
+            } else {
+                bgMusic.play().catch(e => console.log('Music play blocked:', e));
+                musicBtn.textContent = '🔊';
+                musicBtn.classList.add('playing');
+            }
+            isMusicPlaying = !isMusicPlaying;
+        });
+
+        // Firework button
+        const fireworkBtn = document.getElementById('btnFirework');
+        fireworkBtn.addEventListener('click', () => {
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => launchFirework(), i * 200);
+            }
+        });
 
         // --- Countdown Timer ---
         function updateCountdown() {
@@ -692,36 +721,6 @@
             }
         });
 
-        // --- Background Music ---
-        // Using a royalty-free Christmas music URL (placeholder)
-        const MUSIC_URLS = [
-            'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', // Placeholder
-        ];
-        let bgMusic = new Audio();
-        bgMusic.loop = true;
-        bgMusic.volume = 0.5;
-        let isMusicPlaying = false;
-
-        const btnMusic = document.getElementById('btnMusic');
-        btnMusic.addEventListener('click', () => {
-            if (isMusicPlaying) {
-                bgMusic.pause();
-                btnMusic.classList.remove('playing');
-                btnMusic.textContent = '🎵';
-                isMusicPlaying = false;
-            } else {
-                // Try to find a working audio source or use local file
-                bgMusic.src = MUSIC_URLS[0];
-                bgMusic.play().then(() => {
-                    btnMusic.classList.add('playing');
-                    btnMusic.textContent = '🔊';
-                    isMusicPlaying = true;
-                }).catch(e => {
-                    console.log('Music autoplay blocked - add your own audio.mp3 file');
-                    alert('Thêm file audio.mp3 vào thư mục để có nhạc nền!');
-                });
-            }
-        });
 
         // --- Special Message ---
         function showSpecialMessage(text, duration = 3000) {
@@ -736,8 +735,14 @@
         // ==========================================
 
         const photoFiles = [
-            // Thêm ảnh vào đây
-            // './image1.jpg',
+            './images/p1.jpg',
+            './images/p2.jpeg',
+            './images/p3.jpg',
+            './images/p4.jpg',
+            './images/p5.jpg',
+            './images/p6.jpeg',
+            './images/p7.jpg',
+            './images/p8.jpg',
         ];
         const photoTextures = [];
 
@@ -805,7 +810,7 @@
             snowCount: 400,
             sparkleCount: 200,
             explodeRadius: 75,
-            photoOrbitRadius: 25,
+            photoOrbitRadius: 65,
             treeHeight: 80,
             treeBaseRadius: 42
         };
@@ -946,11 +951,16 @@
 
         function createPhotos() {
             const loader = new THREE.TextureLoader();
+            loader.crossOrigin = 'anonymous';
             const geo = new THREE.PlaneGeometry(8, 8);
 
             if (photoFiles.length > 0) {
                 photoFiles.forEach((f, i) => {
-                    photoTextures[i] = loader.load(f);
+                    photoTextures[i] = loader.load(f, (tex) => {
+                        console.log('[PHOTO] Loaded:', f, tex.image.width, 'x', tex.image.height);
+                    }, undefined, (err) => {
+                        console.error('[PHOTO] Error loading:', f, err);
+                    });
                 });
 
                 for (let i = 0; i < photoFiles.length; i++) {
@@ -1231,6 +1241,17 @@
 
             showSpecialMessage("🎄 Let the Magic Begin! ✨", 2500);
 
+            // Auto-play music if available
+            if (bgMusic) {
+                bgMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    if (musicBtn) {
+                        musicBtn.textContent = '🔊';
+                        musicBtn.classList.add('playing');
+                    }
+                }).catch(e => console.log("Auto-play blocked by browser:", e));
+            }
+
             init3D();
 
             const video = document.getElementsByClassName('input_video')[0];
@@ -1265,10 +1286,13 @@
                     const pinchDist = Math.hypot(lm[4].x - lm[8].x, lm[4].y - lm[8].y);
 
                     if (avgDist < 0.25) {
+                        // Fist closed -> TREE
                         state = 'TREE';
-                    } else if (pinchDist < 0.05 && photoMeshes.length > 0) {
+                    } else if (pinchDist < 0.10 && photoMeshes.length > 0) {
+                        // Pinch gesture (thumb+index close) -> PHOTO
                         state = 'PHOTO';
                     } else {
+                        // Palm open -> EXPLODE (photos orbit)
                         state = 'EXPLODE';
                     }
                 } else {
@@ -1289,6 +1313,19 @@
                 renderer.setSize(window.innerWidth, window.innerHeight);
             }
         });
+
+        // Debug state toggle
+        const debugStates = ['TREE', 'EXPLODE', 'PHOTO', 'HEART'];
+        let debugIdx = 0;
+        function toggleDebugState() {
+            debugIdx = (debugIdx + 1) % debugStates.length;
+            state = debugStates[debugIdx];
+            console.log("Manual State Switch:", state);
+            if (state === 'PHOTO') {
+                selectedIndex = (selectedIndex + 1) % (photoFiles.length || 1);
+            }
+            updateStateIndicator();
+        }
     </script>
 </body>
 
