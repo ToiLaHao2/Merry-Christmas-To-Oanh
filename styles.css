@@ -1,0 +1,353 @@
+/* ============================================
+   CHRISTMAS CAMERA GESTURE APP - STYLES
+   ============================================ */
+
+/* CSS Variables */
+:root {
+    --christmas-red: #c41e3a;
+    --christmas-red-dark: #8b0000;
+    --christmas-green: #228b22;
+    --christmas-green-dark: #006400;
+    --christmas-gold: #ffd700;
+    --christmas-gold-light: #ffe066;
+    --snow-white: #fffafa;
+    --night-blue: #0a1628;
+    --night-blue-light: #1a2a4a;
+}
+
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Quicksand', sans-serif;
+    background: linear-gradient(135deg, var(--night-blue) 0%, var(--night-blue-light) 50%, #2d1b4e 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: var(--snow-white);
+}
+
+/* ============================================
+   SNOW EFFECT
+   ============================================ */
+.snow-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.snowflake {
+    position: absolute;
+    top: -20px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    animation: snowfall linear infinite;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+@keyframes snowfall {
+    0% {
+        transform: translateY(-20px) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0.3;
+    }
+}
+
+/* ============================================
+   MAIN CONTAINER
+   ============================================ */
+.main-container {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.christmas-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.christmas-header h1 {
+    font-family: 'Mountains of Christmas', cursive;
+    font-size: 3rem;
+    color: var(--christmas-gold);
+    text-shadow: 
+        0 0 10px rgba(255, 215, 0, 0.5),
+        0 0 20px rgba(255, 215, 0, 0.3),
+        2px 2px 4px rgba(0, 0, 0, 0.5);
+    animation: titleGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes titleGlow {
+    from {
+        text-shadow: 
+            0 0 10px rgba(255, 215, 0, 0.5),
+            0 0 20px rgba(255, 215, 0, 0.3),
+            2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    to {
+        text-shadow: 
+            0 0 20px rgba(255, 215, 0, 0.8),
+            0 0 40px rgba(255, 215, 0, 0.5),
+            0 0 60px rgba(255, 215, 0, 0.3),
+            2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: var(--snow-white);
+    margin-top: 10px;
+    opacity: 0.9;
+}
+
+/* ============================================
+   CAMERA CONTAINER
+   ============================================ */
+.camera-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    aspect-ratio: 4/3;
+    background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 
+        0 0 30px rgba(255, 215, 0, 0.2),
+        0 10px 40px rgba(0, 0, 0, 0.5),
+        inset 0 0 60px rgba(255, 215, 0, 0.05);
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+.camera-container::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(45deg, var(--christmas-red), var(--christmas-gold), var(--christmas-green), var(--christmas-gold), var(--christmas-red));
+    background-size: 400% 400%;
+    border-radius: 22px;
+    z-index: -1;
+    animation: borderGlow 4s ease infinite;
+}
+
+@keyframes borderGlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+#videoFeed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1); /* Mirror effect */
+}
+
+#effectCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* ============================================
+   LOADING & PERMISSION SCREENS
+   ============================================ */
+.loading-screen,
+.permission-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(10, 22, 40, 0.95);
+    z-index: 10;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 215, 0, 0.2);
+    border-top-color: var(--christmas-gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-screen p {
+    margin-top: 20px;
+    font-size: 1.1rem;
+    color: var(--christmas-gold);
+}
+
+.permission-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.permission-screen h2 {
+    color: var(--christmas-gold);
+    margin-bottom: 10px;
+}
+
+.permission-screen p {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 30px;
+    text-align: center;
+    padding: 0 20px;
+}
+
+.btn-permission {
+    background: linear-gradient(135deg, var(--christmas-red), var(--christmas-red-dark));
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    font-family: 'Mountains of Christmas', cursive;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(196, 30, 58, 0.4);
+}
+
+.btn-permission:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(196, 30, 58, 0.6);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ============================================
+   HAND STATUS INDICATOR
+   ============================================ */
+.hand-status {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    padding: 10px 25px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    z-index: 5;
+}
+
+.status-icon {
+    font-size: 1.5rem;
+}
+
+.status-text {
+    font-size: 0.9rem;
+    color: var(--snow-white);
+}
+
+.hand-status.open {
+    border-color: var(--christmas-gold);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+.hand-status.closed {
+    border-color: var(--christmas-red);
+    box-shadow: 0 0 20px rgba(196, 30, 58, 0.4);
+}
+
+/* ============================================
+   INSTRUCTIONS
+   ============================================ */
+.instructions {
+    display: flex;
+    gap: 30px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.instruction-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 15px 25px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.instruction-icon {
+    font-size: 1.5rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .christmas-header h1 {
+        font-size: 2rem;
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
+
+    .camera-container {
+        border-radius: 15px;
+    }
+
+    .instructions {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .instruction-item {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ============================================
+   STAR PARTICLE STYLES (for JS generated elements)
+   ============================================ */
+.star-particle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 100;
+}
