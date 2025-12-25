@@ -230,6 +230,7 @@
             background: linear-gradient(135deg, #FFD700, #FF6B6B, #FFD700, #4ECDC4, #FFD700);
             background-size: 300% 300%;
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: gradientShift 5s ease infinite, float 3s ease-in-out infinite;
             margin-bottom: 20px;
@@ -1082,6 +1083,8 @@
 
             } else {
                 group.scale.set(1, 1, 1);
+                // Auto-rotate even if hand is still, then add hand influence
+                group.rotation.y += 0.005;
                 group.rotation.y += (handRotY - group.rotation.y) * 0.08;
 
                 for (let i = 0; i < count; i++) {
